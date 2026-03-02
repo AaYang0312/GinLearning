@@ -31,6 +31,9 @@ func Index(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 func main() {
+	// 设置为 Release 模式
+	gin.SetMode(gin.ReleaseMode)
+
 	// 创建带默认中间件（日志与恢复）的 Gin 路由器
 	r := gin.Default()
 
