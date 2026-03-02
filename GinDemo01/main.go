@@ -14,7 +14,7 @@ type Response struct {
 }
 
 func Ping(c *gin.Context) {
-	// 返回 JSON 响应
+	// 返回 JSON ResponseStudy
 	c.JSON(http.StatusOK, gin.H{
 		"message": "pong",
 	})
@@ -27,7 +27,7 @@ func Index(c *gin.Context) {
 			"timestamp": time.Now().Unix(),
 		},
 	}
-	// 返回 JSON 响应
+	// 返回 JSON ResponseStudy
 	c.JSON(http.StatusOK, response)
 }
 func main() {
