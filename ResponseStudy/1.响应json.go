@@ -1,7 +1,7 @@
 package main
 
 import (
-	"example/project/ResponseStudy/res"
+	"ResponseStudy/res"
 
 	"github.com/gin-gonic/gin"
 )
