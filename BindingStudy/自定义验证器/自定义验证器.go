@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 	"reflect"
 	"strings"
@@ -35,6 +36,15 @@ func init() {
 		name := field.Tag.Get("json")
 		return fmt.Sprintf("%s----%s", name, label)
 	})
+
+	v.RegisterValidation("fip", func(fl validator.FieldLevel) bool {
+		ip, ok := fl.Field().Interface().(string)
+		if ok && ip != "" {
+			// 判断是否为ip地址
+			return net.ParseIP(ip) != nil
+		}
+		return true
+	})
 }
 
 func ValidateErr(err error) any {
@@ -45,22 +55,26 @@ func ValidateErr(err error) any {
 	var m = map[string]any{}
 	for _, e := range errs {
 		msg := e.Translate(trans)
+		fmt.Printf("msg: %v\n", msg)
 		_list := strings.Split(msg, "----")
 
+		if e.Tag() == "fip" {
+			fmt.Println(e.Field())
+			m[strings.Split(e.Field(), "----")[0]] = "ip地址不符合要求"
+			continue
+		}
 		m[_list[0]] = _list[1]
 	}
 	return m
-}
-
-type User struct {
-	Name  string `json:"name" binding:"required" label:"用户名"`
-	Email string `json:"email" binding:"required,email"`
 }
 
 func main() {
 	r := gin.Default()
 	// 注册路由
 	r.POST("/user", func(c *gin.Context) {
+		type User struct {
+			IP string `json:"ip" binding:"fip" label:"ip地址"`
+		}
 		var user User
 		if err := c.ShouldBindJSON(&user); err != nil {
 			// 参数验证失败
@@ -73,9 +87,7 @@ func main() {
 		}
 
 		// 参数验证成功
-		c.JSON(http.StatusOK, gin.H{
-			"message": fmt.Sprintf("Hello, %s! Your email is %s.", user.Name, user.Email),
-		})
+		c.JSON(http.StatusOK, user)
 	})
 
 	// 启动HTTP服务器
